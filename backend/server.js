@@ -4,16 +4,16 @@ const mongoose = require('mongoose');
 const dotenv= require('dotenv');
 const bcrypt = require('bcryptjs');
 const connectDB = require('./config/db');
-const userRoutes = require('../routes/userRoutes');
-const productRoutes = require('../routes/productRoutes');
-const cartRoutes = require('../routes/cartRoutes');
-const checkoutRoutes = require('../routes/checkoutRoutes');
-const orderRoutes = require('../routes/orderRoutes');
-const uploadRoutes = require('../routes/uploadRoutes');
-const subscriberRoutes = require('../routes/subscribeRoute');
-const adminRoutes = require('../routes/adminRoutes');
-const productAdminRoutes = require('../routes/ProductAdminRoutes');
-const adminOrderRoutes = require('../routes/adminOrderRoutes');
+const userRoutes = require('./routes/userRoutes');
+const productRoutes = require('./routes/productRoutes');
+const cartRoutes = require('./routes/cartRoutes');
+const checkoutRoutes = require('./routes/checkoutRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
+const subscriberRoutes = require('./routes/subscribeRoute');
+const adminRoutes = require('./routes/adminRoutes');
+const productAdminRoutes = require('./routes/productAdminRoutes');
+const adminOrderRoutes = require('./routes/adminOrderRoutes');
 
 const app = express(); //initialies express application
 app.use(express.json());//to ensure server is able to work with json data
