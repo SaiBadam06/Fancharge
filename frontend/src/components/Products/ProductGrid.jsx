@@ -64,11 +64,11 @@ const ProductGrid = ({ products, loading, error }) => {
               <div className="flex items-center justify-between mt-auto">
                 <div className="flex flex-col">
                   <p className="text-gray-900 font-semibold">
-                    ${product.price.toFixed(2)}
+                    ₹{product.discountPrice.toFixed(2)}
                   </p>
                   {product.discountPrice && (
                     <p className="text-sm text-gray-500 line-through">
-                      ${product.discountPrice.toFixed(2)}
+                      ₹{product.price.toFixed(2)}
                     </p>
                   )}
                 </div>
