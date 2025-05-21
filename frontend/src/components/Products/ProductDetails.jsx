@@ -125,11 +125,11 @@ const ProductDetails = ({productId}) => {
 
                         {selectedProduct.originalPrice && (
                             <p className='text-lg text-gray-600 mb-1 line-through'>
-                                ${selectedProduct.originalPrice}
+                                ₹{selectedProduct.originalPrice}
                             </p>
                         )}
                         <p className='text-xl text-gray-500 mb-2'>
-                            ${selectedProduct.price}
+                            ₹{selectedProduct.price}
                         </p>
                         <p className='text-gray-600 mb-4'>
                             {selectedProduct.description}
