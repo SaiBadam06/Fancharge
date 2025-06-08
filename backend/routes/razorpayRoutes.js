@@ -5,16 +5,13 @@ const { protect } = require('../middleware/authMiddleware');
 const crypto = require('crypto');
 
 // Create order
-router.post('/create-order', protect, async (req, res) => {
+router.post('/create-order', protect, async (req, res, next) => {
     try {
         const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
         
         if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
-            console.error('Missing Razorpay credentials:', { 
-                hasKeyId: !!RAZORPAY_KEY_ID, 
-                hasKeySecret: !!RAZORPAY_KEY_SECRET 
-            });
-            throw new Error('Razorpay credentials not configured');
+            console.error('Missing Razorpay credentials');
+            return next(new Error('Payment gateway not configured'));
         }
 
         if (!req.body.amount) {
@@ -32,19 +29,14 @@ router.post('/create-order', protect, async (req, res) => {
             currency: 'INR',
             receipt: `order_${Date.now()}`,
             payment_capture: 1
-        };
-
-        console.log('Creating Razorpay order with options:', options);
-        const order = await razorpay.orders.create(options);
-        console.log('Razorpay order created:', order);
+        };        const order = await razorpay.orders.create(options);
+        if (!order || !order.id) {
+            throw new Error('Failed to create Razorpay order');
+        }
         res.json(order);
     } catch (error) {
         console.error('Razorpay order creation error:', error);
-        res.status(500).json({ 
-            message: 'Error creating order', 
-            error: error.message,
-            details: error.stack
-        });
+        next(error);
     }
 });
 

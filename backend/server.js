@@ -32,23 +32,29 @@ const productAdminRoutes = require('./routes/productAdminRoutes');
 const adminOrderRoutes = require('./routes/adminOrderRoutes');
 const razorpayRoutes = require('./routes/razorpayRoutes');
 
-const app = express(); //initialies express application
-app.use(express.json());//to ensure server is able to work with json data
+// Initialize express
+const app = express();
+app.use(express.json());
 
 // CORS configuration
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? '*' // Allow all origins in production for testing
-    : ['http://localhost:5173', 'http://localhost:3000'],
+const corsOptions = {
+  origin: function(origin, callback) {
+    const allowedOrigins = process.env.NODE_ENV === 'production'
+      ? ['https://fancharge.vercel.app', 'https://fancharge-yazq-gxie0d39g-sai-deekshith-badams-projects.vercel.app']
+      : ['http://localhost:5173', 'http://localhost:3000'];
+    
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 86400
-}));
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
 
-// Handle OPTIONS preflight requests
-app.options('*', cors());
+app.use(cors(corsOptions));
 
 // Additional security headers
 app.use((req, res, next) => {
@@ -74,18 +80,34 @@ app.get('/', (req, res) => {
     });
 });
 
-//API routes
-app.use('/api/users', userRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/checkout', checkoutRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api', subscriberRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/admin/products', productAdminRoutes);
-app.use('/api/admin/orders', adminOrderRoutes);
-app.use('/api/payment', razorpayRoutes);
+// API routes
+const routes = [
+  { path: '/api/users', router: userRoutes },
+  { path: '/api/products', router: productRoutes },
+  { path: '/api/cart', router: cartRoutes },
+  { path: '/api/checkout', router: checkoutRoutes },
+  { path: '/api/orders', router: orderRoutes },
+  { path: '/api/upload', router: uploadRoutes },
+  { path: '/api/subscribe', router: subscriberRoutes },
+  { path: '/api/admin', router: adminRoutes },
+  { path: '/api/admin/products', router: productAdminRoutes },
+  { path: '/api/admin/orders', router: adminOrderRoutes },
+  { path: '/api/payment', router: razorpayRoutes }
+];
+
+// Register all routes
+routes.forEach(({ path, router }) => {
+  app.use(path, router);
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
+});
 
 // Only start the server if we're running directly (not being imported)
 if (require.main === module) {
