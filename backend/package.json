@@ -4,13 +4,14 @@
   "description": "Fancharge Backend API",
   "main": "server.js",
   "engines": {
-    "node": "18.x"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "start": "node -r dotenv/config server.js",
     "dev": "nodemon -r dotenv/config server.js",
     "seed": "node seeder.js",
-    "build": "npm install && npm audit fix"
+    "build": "npm install",
+    "postinstall": "npm audit fix --force"
   },
   "keywords": [],
   "author": "",

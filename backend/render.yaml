@@ -2,10 +2,22 @@ services:
   - type: web
     name: fancharge-backend
     env: node
-    buildCommand: npm install
-    startCommand: node server.js
+    plan: starter
+    buildCommand: npm install && npm audit fix --force
+    startCommand: npm start
+    healthCheckPath: /
     envVars:
       - key: NODE_VERSION
         value: 18.x
       - key: NODE_ENV
         value: production
+    autoDeploy: true
+    disk:
+      name: tmp
+      mountPath: /tmp
+      sizeGB: 1
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+      targetMemoryPercent: 90
+      targetCPUPercent: 90

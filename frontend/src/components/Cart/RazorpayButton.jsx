@@ -44,12 +44,6 @@ const RazorpayButton = ({ amount, onSuccess, onError }) => {
         name: 'Fancharge Store',
         description: 'Purchase from Fancharge Store',
         order_id: orderResponse.data.id,
-        retry: {
-          enabled: false
-        },
-        notes: {
-          address: 'Fancharge Store Note'
-        },
         handler: async function (response) {
           try {
             // Verify payment on backend
@@ -78,15 +72,34 @@ const RazorpayButton = ({ amount, onSuccess, onError }) => {
           email: "",
           contact: ""
         },
+        notes: {
+          address: 'Fancharge Store'
+        },
         theme: {
           color: "#3399cc"
-        },        modal: {
-          confirm_close: true,
-          escape: true,
-          handleback: false,
-          ondismiss: function () {
-            onError(new Error('Payment cancelled by user'));
+        },
+        config: {
+          display: {
+            blocks: {
+              banks: {
+                name: 'Payment Methods',
+                instruments: [
+                  { method: 'upi' },
+                  { method: 'card' },
+                  { method: 'netbanking' },
+                  { method: 'wallet' }
+                ]
+              }
+            },
+            sequence: ['block.banks'],
+            preferences: {
+              show_default_blocks: false
+            }
           }
+        },
+        modal: {
+          confirm_close: true,
+          escape: true
         }
       };
 

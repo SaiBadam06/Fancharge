@@ -39,28 +39,42 @@ app.use(express.json());
 // CORS configuration
 const corsOptions = {
   origin: function(origin, callback) {
-    const allowedOrigins = process.env.NODE_ENV === 'production'
-      ? ['https://fancharge.vercel.app', 'https://fancharge-yazq-gxie0d39g-sai-deekshith-badams-projects.vercel.app']
-      : ['http://localhost:5173', 'http://localhost:3000'];
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    // Allow all origins in development
+    if (process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+      return;
+    }
+
+    // In production, allow Vercel domains and our main domain
+    const isVercelDomain = origin.match(/.*\.vercel\.app$/) !== null;
+    const isMainDomain = origin === 'https://fancharge.vercel.app';
     
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (isVercelDomain || isMainDomain) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Access-Control-Allow-Origin']
 };
 
 app.use(cors(corsOptions));
 
 // Additional security headers
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production'
-    ? 'https://fancharge-yazq-gxie0d39g-sai-deekshith-badams-projects.vercel.app'
-    : 'http://localhost:5173');
+  const origin = req.get('origin');
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
   res.header('Access-Control-Allow-Credentials', true);
   res.header('Cross-Origin-Resource-Policy', 'cross-origin');
   next();
@@ -68,16 +82,17 @@ app.use((req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-//connect to MongoDB
+// Connect to MongoDB
 connectDB();
 
+// Health check route
 app.get('/', (req, res) => {
-    res.json({
-        status: 'healthy',
-        timestamp: new Date(),
-        environment: process.env.NODE_ENV,
-        version: process.env.npm_package_version || '1.0.0'
-    });
+  res.json({
+    status: 'healthy',
+    timestamp: new Date(),
+    environment: process.env.NODE_ENV,
+    version: process.env.npm_package_version || '1.0.0'
+  });
 });
 
 // API route prefix
@@ -97,6 +112,13 @@ apiRouter.use('/admin/orders', adminOrderRoutes);
 apiRouter.use('/admin', adminRoutes);
 apiRouter.use('/payment', razorpayRoutes);
 
+// Not Found handler
+app.use((req, res, next) => {
+  const error = new Error(`Not Found - ${req.originalUrl}`);
+  error.status = 404;
+  next(error);
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
@@ -106,6 +128,30 @@ app.use((err, req, res, next) => {
     return res.status(400).json({
       error: 'Invalid URL format',
       message: 'The requested URL contains invalid parameters'
+    });
+  }
+
+  // Handle CORS errors
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({
+      error: 'CORS Error',
+      message: 'Origin not allowed'
+    });
+  }
+
+  // Handle MongoDB errors
+  if (err.name === 'MongoError' || err.name === 'MongoServerError') {
+    return res.status(500).json({
+      error: 'Database Error',
+      message: 'A database operation failed'
+    });
+  }
+
+  // Handle validation errors
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      error: 'Validation Error',
+      message: err.message
     });
   }
 

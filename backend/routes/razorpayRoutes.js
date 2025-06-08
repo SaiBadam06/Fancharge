@@ -5,17 +5,16 @@ const { protect } = require('../middleware/authMiddleware');
 const crypto = require('crypto');
 
 // Create order
-router.post('/create-order', protect, async (req, res, next) => {
+router.post('/create-order', protect, async (req, res) => {
     try {
         const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
         
         if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
-            console.error('Missing Razorpay credentials');
-            return next(new Error('Payment gateway not configured'));
+            return res.status(500).json({ message: 'Payment gateway not configured' });
         }
 
         if (!req.body.amount) {
-            throw new Error('Amount is required');
+            return res.status(400).json({ message: 'Amount is required' });
         }
 
         const razorpay = new Razorpay({
@@ -25,18 +24,28 @@ router.post('/create-order', protect, async (req, res, next) => {
 
         const { amount } = req.body;
         const options = {
-            amount: Math.round(amount * 100), // Razorpay expects amount in paise and as integer
+            amount: Math.round(amount * 100), // Razorpay expects amount in paise
             currency: 'INR',
             receipt: `order_${Date.now()}`,
-            payment_capture: 1
-        };        const order = await razorpay.orders.create(options);
+            payment_capture: 1,
+            notes: {
+                userId: req.user._id.toString()
+            }
+        };
+
+        const order = await razorpay.orders.create(options);
+        
         if (!order || !order.id) {
             throw new Error('Failed to create Razorpay order');
         }
+        
         res.json(order);
     } catch (error) {
         console.error('Razorpay order creation error:', error);
-        next(error);
+        res.status(500).json({ 
+            message: 'Failed to create order',
+            error: error.message
+        });
     }
 });
 
@@ -46,7 +55,7 @@ router.post('/verify-payment', protect, async (req, res) => {
         const { RAZORPAY_KEY_SECRET } = process.env;
         
         if (!RAZORPAY_KEY_SECRET) {
-            throw new Error('Razorpay credentials not configured');
+            return res.status(500).json({ message: 'Payment gateway not configured' });
         }
 
         const {
@@ -54,6 +63,10 @@ router.post('/verify-payment', protect, async (req, res) => {
             razorpay_payment_id,
             razorpay_signature
         } = req.body;
+
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+            return res.status(400).json({ message: 'Missing payment verification parameters' });
+        }
 
         const sign = razorpay_order_id + '|' + razorpay_payment_id;
         const expectedSign = crypto
@@ -68,7 +81,10 @@ router.post('/verify-payment', protect, async (req, res) => {
                 order_id: razorpay_order_id
             });
         } else {
-            res.status(400).json({ verified: false, message: 'Invalid signature' });
+            res.status(400).json({ 
+                verified: false, 
+                message: 'Invalid payment signature' 
+            });
         }
     } catch (error) {
         console.error('Razorpay verification error:', error);

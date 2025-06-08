@@ -156,15 +156,15 @@ router.delete("/:id", protect, admin, async (req, res) => {
 // @route GET /api/products
 // @desc Get all products with optional query filters
 // @access Public
-router.get("/", async (req,res) => {
-    try{
+router.get("/", async (req, res) => {
+    try {
         const {
             collection,
             sizes,
             colors,
             gender,
             minPrice,
-            maxPrice,            
+            maxPrice,
             sortBy,
             search,
             category,
@@ -175,57 +175,49 @@ router.get("/", async (req,res) => {
 
         let query = {};
 
-        //filter logic
-        if(collection && collection.toLocaleLowerCase !== 'all'){
+        // filter logic
+        if (collection && collection.toLowerCase() !== 'all') {
             query.collections = collection;
         }
-
-        if(category && category.toLocaleLowerCase !== 'all'){
+        if (category && category.toLowerCase() !== 'all') {
             query.category = category;
         }
-
-        if(material){
-            query.material = {$in: material.split(',')};
+        if (material) {
+            query.material = { $in: material.split(',') };
         }
-
         if (brand) {
             query.brand = { $in: brand.split(',') };
-        }        
-
-        if(sizes){
-            query.sizes = {$in: sizes.split(',')};
         }
-
-        if(colors){
-            query.colors = {$in: [colors]};
+        if (sizes) {
+            query.sizes = { $in: sizes.split(',') };
         }
-
-        if(gender){
+        if (colors) {
+            query.colors = { $in: [colors] };
+        }
+        if (gender) {
             query.gender = gender;
         }
-
-        if(minPrice || maxPrice){
+        if (minPrice || maxPrice) {
             query.price = {};
-            if(minPrice){
+            if (minPrice) {
                 query.price.$gte = Number(minPrice);
             }
             if (maxPrice) {
                 query.price.$lte = Number(maxPrice);
-            }            
+            }
         }
-
-        //search logic
-        if(search){
+        // search logic
+        if (search) {
             query.$or = [
-                {name: {$regex: search, $options: 'i'}},
-                {description: {$regex: search, $options: 'i'}},
+                { name: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
             ];
         }
 
-        //sorting logic
+        // sorting logic
         let sort = {};
-        if(sortBy){
-            switch(sortBy){
+        if (sortBy) {
+            switch (sortBy) {
                 case 'priceAsc':
                     sort = { price: 1 };
                     break;
@@ -236,17 +228,19 @@ router.get("/", async (req,res) => {
                     sort = { rating: -1 };
                     break;
                 default:
+                    sort = {};
                     break;
             }
         }
 
-        //Fetch products and apply sorting and limits
-        let products = await Product.find(query).sort(sort).limit(Number(limit) || 0);
+        // Fetch products and apply sorting and limits
+        const products = await Product.find(query).sort(sort).limit(Number(limit) || 0);
         res.json(products);
-
-    } catch(error){
+    } catch (error) {
         console.error(error);
-        res.status(500).send('Server Error');
+        // Always set CORS headers on error
+        res.set('Access-Control-Allow-Origin', '*');
+        res.status(500).json({ message: 'Server Error', error: error.message });
     }
 });
 
