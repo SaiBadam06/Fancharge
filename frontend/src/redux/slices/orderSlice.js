@@ -1,19 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../utils/api";
 
 //Async Thunk to fetch user Orders
 export const fetchUserOrders = createAsyncThunk(
     "orders/fetchUserOrders",
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axios.get(
-                `${import.meta.env.VITE_BACKEND_URL}/api/orders/my-orders`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    },
-                }
-            );
+            const response = await api.get('/api/orders/my-orders');
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -26,14 +19,7 @@ export const fetchOrderDetails = createAsyncThunk(
     "orders/fetchOrderDetails",
     async (orderId, { rejectWithValue }) => {
         try {
-            const response = await axios.get(
-                `${import.meta.env.VITE_BACKEND_URL}/api/orders/${orderId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    },
-                }
-            );
+            const response = await api.get(`/api/orders/${orderId}`);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -42,11 +28,13 @@ export const fetchOrderDetails = createAsyncThunk(
 );
 
 const orderSlice = createSlice({
-    name: "orders",
+    name: "order",
     initialState: {
         orders: [],
-        totalOrders:0,
+        totalOrders: 0,
         orderDetails: null,
+        loading: false,
+        error: null
     },
     reducers: {},
     extraReducers: (builder) => {

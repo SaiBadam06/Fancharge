@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 const ProductManagement = () => {
 
   const dispatch = useDispatch();
-  const { products, loading, error } = useSelector((state) => state.adminProducts);
+  const { products, loading, error } = useSelector((state) => state.adminProduct);
 
   useEffect(() => {
     dispatch(fetchAdminProducts());

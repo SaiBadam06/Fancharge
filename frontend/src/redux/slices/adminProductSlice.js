@@ -1,77 +1,40 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const API_URL = `${import.meta.env.VITE_BACKEND_URL}`;
-const USER_TOKEN = `Bearer ${localStorage.getItem("userToken")}`;
+import api from "../../utils/api";
 
 // Async Thunk to fetch admin products (admin only)
 export const fetchAdminProducts = createAsyncThunk(
-    "adminProducts/fetchProducts",
-    async () => {
-        const response = await axios.get(
-            `${API_URL}/api/admin/products`,
-            {
-                headers: {
-                    Authorization: USER_TOKEN,
-                },
-            }
-        );
+    "adminProduct/fetchProducts",
+    async () => {        const response = await api.get('/api/admin/products');
         return response.data;
     }
 );
 
 // Async Thunk to add a new product (admin only)
 export const createProduct = createAsyncThunk(
-    "adminProducts/createProduct",
-    async (productData) => {
-        const response = await axios.post(
-            `${API_URL}/api/admin/products`,
-            productData,
-            {
-                headers: {
-                    Authorization: USER_TOKEN,
-                },
-            }
-        );
+    "adminProduct/createProduct",
+    async (productData) => {        const response = await api.post('/api/admin/products', productData);
         return response.data;
     }
 );
 
-//Asyync Thunk to update a product (admin only)
+//Async Thunk to update a product (admin only)
 export const updateProduct = createAsyncThunk(
-    "adminProducts/updateProduct",
-    async ({ id, productData }) => {
-        const response = await axios.put(
-            `${API_URL}/api/admin/products/${id}`,
-            productData,
-            {
-                headers: {
-                    Authorization: USER_TOKEN,
-                },
-            }
-        );
+    "adminProduct/updateProduct",
+    async ({ id, productData }) => {        const response = await api.put(`/api/admin/products/${id}`, productData);
         return response.data;
     }
 );
 
 // Async Thunk to delete a product (admin only)
 export const deleteProduct = createAsyncThunk(
-    "adminProducts/deleteProduct",
-    async (id) => {
-        const response = await axios.delete(
-            `${API_URL}/api/products/${id}`,
-            {
-                headers: {
-                    Authorization: USER_TOKEN,
-                },
-            }
-        );
+    "adminProduct/deleteProduct",
+    async (id) => {        const response = await api.delete(`/api/admin/products/${id}`);
         return response.data;
     }
 );
 
 const adminProductSlice = createSlice({
-    name: "adminProducts",
+    name: "adminProduct",
     initialState: {
         products: [],
         loading: false,

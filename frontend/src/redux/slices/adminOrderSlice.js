@@ -1,19 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../utils/api";
 
 //Fetch all orders (admin only)
 export const fetchAllOrders = createAsyncThunk(
-    "adminOrders/fetchAllOrders",
+    "adminOrder/fetchAllOrders",
     async (_, { rejectWithValue }) => {
-        try {
-            const response = await axios.get(
-                `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    },
-                }
-            );
+        try {            const response = await api.get('/api/admin/orders');
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -23,18 +15,9 @@ export const fetchAllOrders = createAsyncThunk(
 
 //Update order delivery status (admin only)
 export const updateOrderStatus = createAsyncThunk(
-    "adminOrders/updateOrderStatus",
+    "adminOrder/updateOrderStatus",
     async ({id, status}, { rejectWithValue }) => {
-        try {
-            const response = await axios.put(
-                `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders/${id}`,
-                { status },
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    },
-                }
-            );
+        try {            const response = await api.put(`/api/admin/orders/${id}`, { status });
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -44,17 +27,9 @@ export const updateOrderStatus = createAsyncThunk(
 
 //Delete an order (admin only)
 export const deleteOrder = createAsyncThunk(
-    "adminOrders/deleteOrder",
+    "adminOrder/deleteOrder",
     async (id, { rejectWithValue }) => {
-        try {
-            await axios.delete(
-                `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders/${id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    },
-                }
-            );
+        try {            await api.delete(`/api/admin/orders/${id}`);
             return id;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -63,7 +38,7 @@ export const deleteOrder = createAsyncThunk(
 );
 
 const adminOrderSlice = createSlice({
-    name: "adminOrders",
+    name: "adminOrder",
     initialState: {
         orders: [],
         totalOrders: 0,

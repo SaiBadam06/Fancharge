@@ -44,8 +44,7 @@ const productSchema = new mongoose.Schema({
         required: true,
     },
     collections: {
-        type: String,
-        required: true,
+        type: String
     },
     material: {
         type: String,

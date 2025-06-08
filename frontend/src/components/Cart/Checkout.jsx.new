@@ -49,18 +49,9 @@ const Checkout = () => {
 
   const handlePaymentSucess = async (details) => {
     try {
-      // Call /pay endpoint with properly formatted payment details
-      const res = await api.put(
+      await api.put(
         `/api/checkout/${checkoutId}/pay`,
-        { 
-          paymentStatus: "paid",
-          paymentDetails: {
-            id: details.paymentId,
-            status: "paid",
-            type: "Razorpay",
-            details: details
-          }
-        },
+        { paymentStatus: "paid", paymentDetails: details },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("userToken")}`,
@@ -71,15 +62,29 @@ const Checkout = () => {
       // Clear the cart after successful payment
       await dispatch(clearCart());
       
-      // Redirect to order confirmation with the new order ID
-      if (res.data && res.data.order && res.data.order._id) {
-        navigate(`/order-confirmation/${res.data.order._id}`);
-      } else {
-        setPaymentError('Order creation failed. Please contact support.');
-      }
+      // Finalize checkout
+      await handleFinalizeCheckout(checkoutId);
     } catch (error) {
-      console.error('Payment failed:', error.response?.data || error);
-      setPaymentError(error.response?.data?.message || error.message || 'Payment failed. Please try again.');
+      console.error(error);
+      setPaymentError(error.message || 'Payment failed. Please try again.');
+    }
+  };
+
+  const handleFinalizeCheckout = async (checkoutId) => {
+    try {
+      await api.post(
+        `/api/checkout/finalize`,
+        { checkoutId },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+          },
+        }
+      );
+      navigate("/order-confirmation");
+    } catch (error) {
+      console.error(error);
+      setPaymentError(error.message || 'Failed to finalize checkout. Please contact support.');
     }
   };
 

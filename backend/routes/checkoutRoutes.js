@@ -55,20 +55,115 @@ router.put('/:id/pay', protect, async (req, res) => {
             return res.status(404).json({ message: 'Checkout session not found' });
         }
 
-        if(paymentStatus === "paid"){
+        // Validate payment status
+        if (paymentStatus !== "paid") {
+            return res.status(400).json({ message: 'Invalid payment status' });
+        }
+
+        // Validate required payment details
+        if (!paymentDetails || !paymentDetails.id) {
+            return res.status(400).json({ message: 'Payment details are required' });
+        }
+
+        // Update checkout payment info
         checkout.isPaid = true;
         checkout.paymentStatus = paymentStatus;
         checkout.paymentDetails = paymentDetails;
         checkout.paidAt = Date.now();
 
-        await checkout.save();
-        res.status(200).json(checkout);
-        } else {
-            res.status(400).json({ message: 'invalid payment status' });
+        // --- Auto-finalize and create order here ---
+        if (!checkout.isFinalized) {
+            try {
+                // Fetch user for fallback fields
+                const user = await require('../models/User').findById(checkout.user);
+                
+                // Ensure shipping address fields exist
+                if (!checkout.shippingAddress) {
+                    throw new Error('Shipping address is required');
+                }
+
+                let firstName = checkout.shippingAddress.firstName;
+                let lastName = checkout.shippingAddress.lastName;
+                let phone = checkout.shippingAddress.phone;
+                
+                // Use user name as fallback
+                if (!firstName && user && user.name) {
+                    firstName = user.name.split(' ')[0];
+                    lastName = user.name.split(' ').slice(1).join(' ');
+                }
+
+                // Set defaults for optional fields
+                if (!lastName) lastName = "";
+                if (!phone) phone = "";
+
+                // Prepare order items
+                const orderItems = checkout.checkoutItems.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    images: item.image ? [{ url: item.image }] : [],
+                    price: item.price,
+                    product: item.productId
+                }));
+
+                // Prepare shipping address
+                const shippingAddress = {
+                    firstName,
+                    lastName,
+                    address: checkout.shippingAddress.address,
+                    city: checkout.shippingAddress.city,
+                    postalCode: checkout.shippingAddress.postalCode,
+                    country: checkout.shippingAddress.country,
+                    phone
+                };
+
+                // Prepare payment details
+                const paymentDetailsObj = {
+                    id: paymentDetails.id || "",
+                    status: paymentDetails.status || paymentStatus || "paid",
+                    type: paymentDetails.type || checkout.paymentMethod || "Razorpay",
+                    details: paymentDetails || {}
+                };
+
+                // Create final order
+                const finalOrder = await Order.create({
+                    user: checkout.user,
+                    checkoutId: checkout._id,
+                    orderItems,
+                    shippingAddress,
+                    paymentDetails: paymentDetailsObj,
+                    totalPrice: checkout.totalPrice,
+                    isPaid: true,
+                    paidAt: checkout.paidAt,
+                    isDelivered: false,
+                    status: "pending"
+                });
+
+                // Mark checkout as finalized
+                checkout.isFinalized = true;
+                checkout.finalizedAt = Date.now();
+                await checkout.save();
+
+                // Delete the cart
+                await Cart.findOneAndDelete({ user: checkout.user });
+
+                return res.status(200).json({ checkout, order: finalOrder });
+            } catch (error) {
+                console.error('Order creation error:', error);
+                return res.status(500).json({ 
+                    message: 'Failed to create order',
+                    error: error.message 
+                });
+            }
         }
+
+        await checkout.save();
+        return res.status(200).json({ checkout });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server Error" });
+        console.error('Payment processing error:', error);
+        return res.status(500).json({ 
+            message: "Payment processing failed",
+            error: error.message
+        });
     }
 });
 
@@ -84,18 +179,58 @@ router.post('/:id/finalize', protect, async (req, res) => {
         }
 
         if (checkout.isPaid && !checkout.isFinalized) {
-            //create final order based on the checkout details
+            // Fetch user for fallback fields
+            const user = await require('../models/User').findById(checkout.user);
+            let firstName = checkout.shippingAddress.firstName;
+            let lastName = checkout.shippingAddress.lastName;
+            let phone = checkout.shippingAddress.phone;
+            if (!firstName && user && user.name) {
+                firstName = user.name.split(' ')[0];
+                lastName = user.name.split(' ').slice(1).join(' ');
+            }
+            if (!lastName) lastName = "";
+            if (!phone) phone = "";
+
+            // Map checkoutItems to orderItems with required fields
+            const orderItems = checkout.checkoutItems.map(item => ({
+                name: item.name,
+                quantity: item.quantity,
+                images: item.image ? [{ url: item.image }] : [],
+                price: item.price,
+                product: item.productId // ensure this is set in checkoutItems
+            }));
+
+            // Ensure shippingAddress has all required fields
+            const shippingAddress = {
+                firstName,
+                lastName,
+                address: checkout.shippingAddress.address,
+                city: checkout.shippingAddress.city,
+                postalCode: checkout.shippingAddress.postalCode,
+                country: checkout.shippingAddress.country,
+                phone
+            };
+
+            // Ensure paymentDetails has all required fields
+            const paymentDetails = {
+                id: checkout.paymentDetails?.id || "",
+                status: checkout.paymentDetails?.status || checkout.paymentStatus || "paid",
+                type: checkout.paymentDetails?.type || checkout.paymentMethod || "Razorpay",
+                details: checkout.paymentDetails || {}
+            };
+
+            // Create final order based on the checkout details
             const finalOrder = await Order.create({
                 user: checkout.user,
-                orderItems: checkout.checkoutItems,
-                shippingAddress: checkout.shippingAddress,
-                paymentMethod: checkout.paymentMethod,
+                checkoutId: checkout._id,
+                orderItems,
+                shippingAddress,
+                paymentDetails,
                 totalPrice: checkout.totalPrice,
                 isPaid: true,
                 paidAt: checkout.paidAt,
                 isDelivered: false,
-                paymentStatus: "paid",
-                paymentDetails: checkout.paymentDetails,
+                status: "pending"
             });
 
             //marl the checkout as finalized

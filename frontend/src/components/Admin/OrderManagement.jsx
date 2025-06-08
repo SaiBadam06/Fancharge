@@ -10,7 +10,7 @@ const OrderManagement = () => {
   const navigate = useNavigate();
 
   const { user } = useSelector((state) => state.auth);
-  const { orders, loading, error } = useSelector((state) => state.adminOrders);
+  const { orders, loading, error } = useSelector((state) => state.adminOrder);
 
   useEffect(() => {
     if (user && user.role !== 'admin') {

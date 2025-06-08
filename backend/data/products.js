@@ -12,7 +12,7 @@ const products = [
     collection: "Practice",
     brand: "SRH Official",
     sizes: ["M", "L", "XL"],
-    colors: ["Blue", "Navy"],
+    colors: ["Orange"],
     material: "Polyester",
     gender: "Men",
     images: [{ url: "/images/srh-practice-jersey.jpg", altText: "SRH Practice Jersey" }]
