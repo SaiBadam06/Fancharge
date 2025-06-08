@@ -80,32 +80,39 @@ app.get('/', (req, res) => {
     });
 });
 
-// API routes
-const routes = [
-  { path: '/api/users', router: userRoutes },
-  { path: '/api/products', router: productRoutes },
-  { path: '/api/cart', router: cartRoutes },
-  { path: '/api/checkout', router: checkoutRoutes },
-  { path: '/api/orders', router: orderRoutes },
-  { path: '/api/upload', router: uploadRoutes },
-  { path: '/api/subscribe', router: subscriberRoutes },
-  { path: '/api/admin', router: adminRoutes },
-  { path: '/api/admin/products', router: productAdminRoutes },
-  { path: '/api/admin/orders', router: adminOrderRoutes },
-  { path: '/api/payment', router: razorpayRoutes }
-];
+// API route prefix
+const apiRouter = express.Router();
+app.use('/api', apiRouter);
 
-// Register all routes
-routes.forEach(({ path, router }) => {
-  app.use(path, router);
-});
+// Mount routes with explicit paths
+apiRouter.use('/users', userRoutes);
+apiRouter.use('/products', productRoutes);
+apiRouter.use('/cart', cartRoutes);
+apiRouter.use('/checkout', checkoutRoutes);
+apiRouter.use('/orders', orderRoutes);
+apiRouter.use('/upload', uploadRoutes);
+apiRouter.use('/subscribe', subscriberRoutes);
+apiRouter.use('/admin/products', productAdminRoutes);
+apiRouter.use('/admin/orders', adminOrderRoutes);
+apiRouter.use('/admin', adminRoutes);
+apiRouter.use('/payment', razorpayRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
+
+  // Handle path-to-regexp errors
+  if (err instanceof TypeError && err.message.includes('Missing parameter name')) {
+    return res.status(400).json({
+      error: 'Invalid URL format',
+      message: 'The requested URL contains invalid parameters'
+    });
+  }
+
+  // Handle other errors
   res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    error: err.name || 'Error',
+    message: err.message || 'An unexpected error occurred'
   });
 });
 
