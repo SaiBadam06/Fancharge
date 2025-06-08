@@ -38,7 +38,7 @@ app.use(express.json());//to ensure server is able to work with json data
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://fancharge-yazq-gxie0d39g-sai-deekshith-badams-projects.vercel.app', 'https://fancharge.vercel.app']
+    ? '*' // Allow all origins in production for testing
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
