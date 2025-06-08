@@ -38,12 +38,27 @@ app.use(express.json());//to ensure server is able to work with json data
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-frontend-domain.vercel.app'] // Replace with your actual frontend domain
+    ? ['https://fancharge-yazq-gxie0d39g-sai-deekshith-badams-projects.vercel.app', 'https://fancharge.vercel.app']
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400
 }));
+
+// Handle OPTIONS preflight requests
+app.options('*', cors());
+
+// Additional security headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production'
+    ? 'https://fancharge-yazq-gxie0d39g-sai-deekshith-badams-projects.vercel.app'
+    : 'http://localhost:5173');
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+});
 
 const PORT = process.env.PORT || 3000;
 
