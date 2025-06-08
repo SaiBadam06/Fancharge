@@ -248,30 +248,32 @@ router.get("/", async (req, res) => {
 // @desc Retrieve the products with the highest rating
 // @access Public
 router.get("/best-seller", async (req, res) => {
-    try{
-        const bestSeller = await Product.findOne().sort({rating: -1});
-        if(bestSeller){
+    try {
+        const bestSeller = await Product.findOne().sort({ rating: -1 });
+        if (bestSeller) {
             res.json(bestSeller);
         } else {
-            res.status(404).json({message: 'No best sellers found'});
+            res.status(404).json({ message: 'No best sellers found' });
         }
-    } catch(error){
+    } catch (error) {
         console.error(error);
-        res.status(500).send('Server Error');
+        res.set('Access-Control-Allow-Origin', '*');
+        res.status(500).json({ message: 'Server Error', error: error.message });
     }
 });
 
-// @route GET /api/products/new-arrival
+// @route GET /api/products/new-arrivals
 // @desc Retrieve the latest 8 products created (based on creation date)
 // @access Public
 router.get("/new-arrivals", async (req, res) => {
-    try{
+    try {
         //fetch 8 latest products
-        const newArrival = await Product.find().sort({createdAt: -1}).limit(8);
+        const newArrival = await Product.find().sort({ createdAt: -1 }).limit(8);
         res.json(newArrival);
-    } catch(error){
+    } catch (error) {
         console.error(error);
-        res.status(500).send('Server Error');
+        res.set('Access-Control-Allow-Origin', '*');
+        res.status(500).json({ message: 'Server Error', error: error.message });
     }
 });
 
