@@ -7,6 +7,21 @@
   --srh-black: #000000;
   --srh-gold: #daa520;
   --srh-gray: #4a4a4a;
+
+  /* Dark mode colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --border-color: #e5e7eb;
+}
+
+[data-theme='dark'] {
+  --bg-primary: #1f2937;
+  --bg-secondary: #111827;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --border-color: #374151;
 }
 
 #root{
