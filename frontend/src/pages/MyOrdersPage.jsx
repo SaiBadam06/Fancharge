@@ -61,11 +61,11 @@ const MyOrdersPage = () => {
     // Show loading state
     if (loading) {
         return (
-            <div className='min-h-[400px] flex items-center justify-center'>
+            <div className='min-h-[400px] flex items-center justify-center p-4'>
                 <motion.div 
                     initial={{ opacity: 0 }} 
                     animate={{ opacity: 1 }} 
-                    className='text-center text-gray-600'
+                    className='text-center text-gray-600 text-base sm:text-lg'
                 >
                     Loading orders...
                 </motion.div>
@@ -76,17 +76,17 @@ const MyOrdersPage = () => {
     // Show error state with login redirect
     if (error) {
         return (
-            <div className='min-h-[400px] flex items-center justify-center'>
+            <div className='min-h-[400px] flex items-center justify-center p-4'>
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className='text-center'
+                    className='text-center text-base sm:text-lg'
                 >
                     <p className='text-red-500 mb-4'>{error}</p>
                     {(!user || !token) && (
                         <button 
                             onClick={() => navigate('/login')}
-                            className='text-[var(--srh-orange)] hover:underline'
+                            className='bg-[var(--srh-orange)] text-white px-6 py-2 rounded hover:bg-[var(--srh-gold)] transition-colors text-base font-semibold shadow-md'
                         >
                             Click here to login
                         </button>
@@ -97,7 +97,7 @@ const MyOrdersPage = () => {
     }
 
     return (
-        <div className='max-w-7xl mx-auto p-4 sm:p-6'>
+        <div className='max-w-7xl mx-auto p-2 sm:p-4'>
             <motion.h2 
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -107,16 +107,16 @@ const MyOrdersPage = () => {
             </motion.h2>
             <div className='relative shadow-md sm:rounded-lg overflow-hidden bg-white'>
                 <div className='overflow-x-auto'>
-                    <table className='w-full text-left text-gray-700'>
+                    <table className='w-full text-left text-gray-700 text-xs sm:text-sm'>
                         <thead className='bg-gradient-to-r from-blue-100 to-blue-200 text-xs uppercase text-blue-800'>
                             <tr>
-                                <th className='px-3 sm:px-6 py-3 whitespace-nowrap'>Product</th>
-                                <th className='px-3 sm:px-6 py-3 whitespace-nowrap'>Order ID</th>
-                                <th className='px-3 sm:px-6 py-3 whitespace-nowrap'>Date</th>
-                                <th className='px-3 sm:px-6 py-3 whitespace-nowrap'>Address</th>
-                                <th className='px-3 sm:px-6 py-3 whitespace-nowrap'>Items</th>
-                                <th className='px-3 sm:px-6 py-3 whitespace-nowrap'>Price</th>
-                                <th className='px-3 sm:px-6 py-3 whitespace-nowrap'>Status</th>
+                                <th className='px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap'>Product</th>
+                                <th className='px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap'>Order ID</th>
+                                <th className='px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap'>Date</th>
+                                <th className='px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap'>Address</th>
+                                <th className='px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap'>Items</th>
+                                <th className='px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap'>Price</th>
+                                <th className='px-2 sm:px-3 py-2 sm:py-3 whitespace-nowrap'>Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -128,7 +128,7 @@ const MyOrdersPage = () => {
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.1 }}
                                         onClick={() => handleRowClick(order._id)}
-                                        className='border-b hover:bg-blue-50 transition-all duration-300 cursor-pointer'
+                                        className='border-b hover:bg-blue-50 transition-all duration-300 cursor-pointer text-xs sm:text-sm'
                                     >
                                         <td className='px-3 sm:px-6 py-4'>
                                             <div className="relative group">

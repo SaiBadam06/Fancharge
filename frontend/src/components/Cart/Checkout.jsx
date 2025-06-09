@@ -234,20 +234,20 @@ const Checkout = () => {
         <h3 className='text-lg mb-4'>Order Summary</h3>
         <div className='border-t py-4 mb-4'>
           {cart.products.map((product, index) => (
-            <div key={index} className='flex items-start justify-between py-2 border-2 mb-2'>
-              <div className='flex items-start'>
+            <div key={index} className='flex items-start justify-between py-2 border-2 mb-2 min-w-0'>
+              <div className='flex items-start min-w-0'>
                 <img 
                   src={product.image} 
                   alt={product.name} 
-                  className='w-20 h-25 object-cover mr-4' 
+                  className='w-20 h-25 object-cover mr-4 rounded' 
                 />
-                <div>
-                  <h3 className='text-md'>{product.name}</h3>
-                  <p className='text-gray-600'>Size: {product.size}</p>
-                  <p className='text-gray-600'>Color: {product.color}</p>
+                <div className='min-w-0'>
+                  <h3 className='text-md truncate max-w-[120px]' title={product.name}>{product.name}</h3>
+                  <p className='text-gray-600 text-xs sm:text-sm'>Size: {product.size}</p>
+                  <p className='text-gray-600 text-xs sm:text-sm'>Color: {product.color}</p>
                 </div>
               </div>
-              <p className='text-xl'>${product.price.toLocaleString()}</p>
+              <p className='text-base sm:text-xl font-semibold truncate max-w-[70px]' title={`₹${product.price}`}>₹{product.price.toLocaleString()}</p>
             </div>
           ))}
         </div>
