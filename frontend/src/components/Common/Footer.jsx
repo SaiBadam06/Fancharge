@@ -1,14 +1,14 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { IoLogoInstagram } from 'react-icons/io5';
 import { RiTwitterXFill } from 'react-icons/ri';
 import { TbBrandMeta } from 'react-icons/tb';
 import { Link } from 'react-router-dom';
 import {FiPhoneCall } from 'react-icons/fi';
 
-const Footer = () => {
-  return (
-    <footer className='border-t py-12'>
-      <div className='container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 px-4 lg:px-10'>
+const IPL_TEAMS = [
+  { name: 'CSK', display: 'Chennai Super Kings', color: '#f9cd05', logo: 'https://upload.wikimedia.org/wikipedia/en/9/9a/Chennai_Super_Kings_Logo.png' },
+  { name: 'MI', display: 'Mumbai Indians', color: '#004ba0', logo: 'https://upload.wikimedia.org/wikipedia/en/2/2d/Mumbai_Indians_Logo.png' },
+  { name: 'RCB', display: 'Royal Challengers Bangalore', color: '#d50032', logo: 'https://upload.wikimedia.org/wikipedia/en/0/09/Royal_Challengers_Bangalore_Logo.png' },
         <div>
             <h3 className='text-lg mb-4 font-medium text-gray-800'>News</h3>
             <p className='text-sm mb-4 text-gray-500'>Be the first to hear about new Products, exclusive events and online offers.</p>

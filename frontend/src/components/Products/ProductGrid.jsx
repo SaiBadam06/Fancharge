@@ -46,10 +46,10 @@ const ProductGrid = ({ products, loading, error }) => {
         <Link 
           key={product._id} 
           to={`/product/${product._id}`}
-          className="block group h-full"
+          className="block group h-full focus:outline-none focus:ring-2 focus:ring-[var(--srh-orange)]"
         >
-          <div className="bg-white p-4 rounded-lg shadow-md transition-all duration-300 group-hover:shadow-lg h-[330px] w-auto flex flex-col">
-            <div className="aspect-square mb-4 overflow-hidden rounded-lg flex-shrink-0">
+          <div className="bg-white p-3 sm:p-4 rounded-xl shadow-md transition-all duration-300 group-hover:shadow-lg h-full flex flex-col">
+            <div className="aspect-square mb-3 overflow-hidden rounded-lg flex-shrink-0">
               <img 
                 src={product.images[0].url} 
                 alt={product.images[0].altText || product.name} 
@@ -57,21 +57,15 @@ const ProductGrid = ({ products, loading, error }) => {
                 loading="lazy"
               />
             </div>
-            <div className="flex flex-col flex-grow justify-between">
-              <h3 className="text-sm font-medium mb-2 line-clamp-2 text-gray-800">
+            <div className="flex flex-col flex-grow justify-between min-w-0">
+              <h3 className="text-base sm:text-lg font-medium mb-1 line-clamp-2 text-gray-800 truncate min-w-0" title={product.name}>
                 {product.name}
               </h3>
-              <div className="flex items-center justify-between mt-auto">
-                <div className="flex flex-col">
-                  <p className="text-gray-900 font-semibold">
-                    ₹{product.discountPrice.toFixed(2)}
-                  </p>
-                  {product.discountPrice && (
-                    <p className="text-sm text-gray-500 line-through">
-                      ₹{product.price.toFixed(2)}
-                    </p>
-                  )}
-                </div>
+              <div className="flex items-end gap-2 mt-auto min-w-0">
+                <span className="text-gray-900 font-semibold text-lg sm:text-xl truncate max-w-[90%]" title={`₹${product.discountPrice.toFixed(2)}`}>₹{product.discountPrice.toFixed(2)}</span>
+                {product.discountPrice && (
+                  <span className="text-xs sm:text-sm text-gray-500 line-through truncate max-w-[60%]" title={`₹${product.price.toFixed(2)}`}>₹{product.price.toFixed(2)}</span>
+                )}
               </div>
             </div>
           </div>

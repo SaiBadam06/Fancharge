@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import UserLayout from './components/Layout/UserLayout';
 import Home from './pages/Home';
 import { Toaster } from 'sonner';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -26,8 +27,9 @@ import store from './redux/store';
 const App = () => {
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <Toaster position="top-right" />
+      <ThemeProvider>
+        <BrowserRouter>
+          <Toaster position="top-right" theme="system" />
         <Routes>
           <Route path="/" element={<UserLayout />}>
             {/* User Layout */}
@@ -55,6 +57,7 @@ const App = () => {
           </Route>
         </Routes>
       </BrowserRouter>
+      </ThemeProvider>
     </Provider>
   );
 };

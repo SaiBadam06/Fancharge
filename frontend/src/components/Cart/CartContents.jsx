@@ -81,15 +81,15 @@ const CartContents = ({cart, userId, guestId}) => {
               </div>
             </div>
           </div>
-          <div className="flex items-start space-x-4">
-            <p className="font-medium">${product.price.toLocaleString()}</p>
+          <div className="flex items-start space-x-4 min-w-0">
+            <p className="font-medium text-base sm:text-lg truncate max-w-[80px]" title={`₹${product.price}`}>₹{product.price.toLocaleString()}</p>
             <button 
               onClick={() => handleRemoveFromCart(
                 product.productId,
                 product.size,
                 product.color
               )}
-              className="hover:text-red-700"
+              className="hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-[var(--srh-orange)] rounded"
             >
               <RiDeleteBin3Line className="h-6 w-6 text-red-600" />
             </button>
